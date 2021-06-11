@@ -1,24 +1,27 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Path
 import json
 import pandas as pd
 
 app = FastAPI()
+dataset = pd.read_csv("dataset/vgsales.csv")
+
+print(dataset.loc[dataset["id"]==3].to_json(orient="records"))
 
 @app.get("/")
 async def home():
     return {"status":"Online"}
 
-'''
-@app.get("/{txt}")
-async def str2json(txt:str):
-    jsn = json.loads(txt)
+
+@app.get("/item_id/{id}")
+async def get_item (id: int = Path(None, gt=0, lt=16601)):
+    data = dataset.loc[dataset["id"] == id]
+    data = data.to_json(orient="records")
+    jsn = json.loads(data)
     return jsn
-'''
+
 
 @app.get("/dataset")
 async def get_all_dataset():
-    dataset = pd.read_csv("dataset/Caturtunggal_Harian_all.csv")
-    #dataset.sort_values(by=["precipMM"], inplace=True)
-    dataset = dataset.to_json(orient="records")
-    parsed = json.loads(dataset)
+    data = dataset.to_json(orient="records")
+    parsed = json.loads(data)
     return(parsed)
